@@ -14,6 +14,9 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import SliderInput from "./SliderInput";
 import InputField from "./InputField";
 const seedrandom = require('seedrandom');
+const papaparse = require('papaparse');
+
+
 const seedForDelete = 5574;
 const seedForSwap = 6600;
 const seedForInsert = 9600;
@@ -29,6 +32,7 @@ const translations = [
         address:"Адреса",
         fullName:"Повне ім'я",
         alphabet: 'абвгґдеєжзиіїйклмнопрстуфхцчшщьюя',
+        exportToCsv: 'Експорт у CSV',
     },
     {
         code: "en_US",
@@ -40,6 +44,7 @@ const translations = [
         address:"Address",
         fullName:"Full name",
         alphabet: 'abcdefghijklmnopqrstuvwxyz',
+        exportToCsv: 'Export to CSV',
     },
     {
         code: "pl",
@@ -51,6 +56,7 @@ const translations = [
         address:"Adres",
         fullName:"Pełne imię i nazwisko",
         alphabet: 'aąbcćdeęfghijklłmnńoóprsśtuwyzźż',
+        exportToCsv: 'Eksportuj do pliku CSV',
     }
 ];
 
@@ -74,6 +80,8 @@ export function RequestsTable<T>({ data, loading, disableFilters = false, title 
 
     const [messageApi, messageContext] = message.useMessage();
     const [country, setCountry] = useState('');
+
+    const [scrolled, setScrolled] = useState(0);
 
     const [seed, setSeed] = useState(0);
     const [tableData, setTableData] = useState<any[]>([]);
@@ -218,6 +226,21 @@ export function RequestsTable<T>({ data, loading, disableFilters = false, title 
     const [items, setItems] = useState<string[]>([]);
     const [loadedCount, setLoadedCount] = useState<number>(2);
 
+    const generateCSV = () => {
+        const data = tableDataWithError.length !== 0 ? tableDataWithError : tableData;
+        const csv = papaparse.unparse(tableData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', 'data.csv');
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return true;
+    };
+
 
     const handleScroll = async (event: any) => {
         const { scrollTop, scrollHeight, clientHeight } = event.target;
@@ -325,9 +348,13 @@ export function RequestsTable<T>({ data, loading, disableFilters = false, title 
                     <Typography.Title level={3} $noMargin>
                         {getTranslation( language,"users")}
                     </Typography.Title>
+                    <Button onClick={generateCSV}>{getTranslation( language,"exportToCsv")}</Button>
 
                 </Space>
             </Container>
+
+
+
 
             <div onScroll={handleScroll} style={{height: "500px", overflowY: "scroll"}}>
                 <Table dataSource={tableDataWithError.length !== 0 ? tableDataWithError : tableData} loading={loading || loadingMore} pagination={false}>
@@ -341,4 +368,4 @@ export function RequestsTable<T>({ data, loading, disableFilters = false, title 
         </div>
 
     );
-};
+}
