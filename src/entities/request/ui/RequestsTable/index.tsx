@@ -228,7 +228,7 @@ export function RequestsTable<T>({ data, loading, disableFilters = false, title 
 
     const generateCSV = () => {
         const data = tableDataWithError.length !== 0 ? tableDataWithError : tableData;
-        const csv = papaparse.unparse(tableData);
+        const csv = papaparse.unparse(data);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
